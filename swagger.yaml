@@ -1,0 +1,1712 @@
+swagger: 2.0.0
+info:
+  version: 1.0.0
+  title: It's My Working Dress
+  description: 출근복 
+    테스트 용 인증 키 
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlNGE1MzJhNWExN2FjMWRmNDQwMzljNCIsImVtYWlsIjoidXNlcjdAaGouY29tIiwiaWF0IjoxNTg3NjM0NjkzLCJleHAiOjE2MTkxNzA2OTN9.ukEbZyIJqLumsrHJLJTEX8usyW1dB5n83RHG5kAGv7g
+servers: 
+  - url: http://localhost:8080/api
+    description: 개발 서버 
+  - url: http://localhost:8080/api
+    description: 상용 서버  
+host: localhost:8080
+basePath: /api
+paths:
+  /init/splash/{appSeq}/{notiSeq}/{termSeq}:
+    get:
+      summary: 약관, 공지, 업데이트 정보 
+      description: 앱 실행 시 약관, 공지, 업데이트 정보를 받아온다.
+      tags: ["other"]
+      parameters:
+        - in: path
+          name: appSeq
+          type: integer
+          requried: true
+        - in: path
+          name: notiSeq
+          type: integer
+          requried: true
+        - in: path
+          name: termSeq
+          type: integer
+          requried: true
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/InitData'
+        530:
+          description:  몽고 디비 에러
+
+  #######################  ACCOUNT  #######################
+  /account:
+    post:
+      summary: 회원정보 등록
+      description: 회원 정보 등록 시 User, Setting이 함께 만들어진다. 
+      tags: ["account"]
+      parameters:
+        - in: body
+          name: body
+          description: The user to create.
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - type
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+              type:
+                type: integer
+                enum: [0, 1]
+      responses:
+        200:
+          description: 회원등록 성공
+          schema: 
+            $ref: '#/definitions/Account'
+        251:
+          description: 사용중인 이메일 
+          schema:
+            $ref: '#/definitions/JustMessage'
+        501:
+          description: 회원가입 실패
+        530:
+          description:  몽고 디비 에러
+        550:
+          description: Insert 결과 Null
+  /account/signin:
+    post:
+      summary: 로그인
+      description: 로그인 시 JWT 토큰이 발급된다. 이후 회원 인증은 Header에 추가된 JWT 토큰을 이용한다.
+      tags: ["account"]
+      parameters:
+        - in: body
+          name: body
+          description: The user to create.
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - type
+            properties:
+              email:
+                type: string
+                format: email
+              password:
+                type: string
+              type:
+                type: integer
+                enum: [0, 1]
+      responses:
+        200:
+          description: 로그인 성공
+          schema: 
+            $ref: '#/definitions/Signin'
+        252:
+          description: 사용자 정보 없음
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+        556:
+          description: 로그인 실패 파라메터 없음
+  /account/check/{email}:
+    get:
+      summary: 이메일 인증 URL 요청
+      description: Path에 추가된 이메일 주소로 인증 메일을 전송한다. 
+      tags: ["account"]
+      parameters:
+        - in: path
+          description: 검색할 email
+          name: email
+          require: true
+          type: string
+          format: email
+      responses:
+        200:
+          schema: 
+            $ref: '#/definitions/SIMPLE'
+        531:
+          description: JWT 에러 
+  /account/change/pwd:
+    post:
+      summary: 비밀번호 변경 요청
+      description: 비밀번호 변경 url을 이메일로 보낸다.
+      tags: ["account"]
+      parameters:
+        - in: body
+          name: body
+          require: true
+          type: object
+          schema:
+            properties:
+              email:
+                type: string
+      responses:
+        200:
+          schema: 
+            $ref: '#/definitions/SIMPLE'
+        531:
+          description: JWT 에러 
+    patch:
+      summary: 비밀번호 변경
+      description: 비밀번호 변경 로직에 따라 호출 된다.
+      tags: ["account"]
+      parameters: 
+        - in: body
+          name: body
+          required: true
+          type: object
+          schema:
+            properties:
+              token:
+                type: string
+              password:
+                type: string
+      response: 
+        200:
+          schema: 
+            $ref: '#/definitions/SIMPLE'
+        531:
+          description: JWT 에러 
+          
+  /account/change/pwd/{token}:
+    get:
+      summary: 비밀번호 변경
+      description:  비밀번호 변경 화면으로 redirection 시킨다.
+      tags: ["account"]
+      parameters:
+        - in: path
+          name: token
+          require: true
+          type: string
+      responses:
+        200:
+          description: 화면 이동.
+
+  /account/email/exist/{email}:
+    get:
+      summary: 이메일 사용여부 확인
+      description: 이메일 사용 가능한지 확인한다.
+      tags: ["account"]
+      parameters:
+        - in: path
+          description: 검색할 email
+          name: email
+          require: true
+          type: string
+          format: email
+      responses:
+        200:
+          schema: 
+            $ref: '#/definitions/EmailCheck'
+        252:
+          description: 사용자 정보 없음
+        530:
+          description: 몽고 디비 에러
+
+  /account/vaildation/email/{token}:
+    get:
+      summary: 이메일 인증
+      description: 이메일에 전송된 url을 통해 본인 이메일 확인 인증 
+      tags: ["account"]
+      parameters:
+        - in: header
+          description: 해더 파라메터 
+          name: x-access-token
+          require: true
+          type: string 
+        - in: path
+          description: 사용자 인증 토큰
+          name: token
+          require: true
+          type: string
+      response:
+        200:
+          description: 인증 windows rediraction
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+
+  #######################  USER  #######################
+  /user/me:
+    get:
+      summary: 내 정보 
+      description: 내 정보를 가져온다.
+      tags: ["user"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/User'
+        521:
+          description: 권한 없음 
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+  /user/detail/me:
+    get:
+      summary: 내 정보 
+      description: 내 상세 정보를 가져온다.
+      tags: ["user"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/DETAILME'
+        521:
+          description: 권한 없음 
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+
+  /user/{page}:
+    get:
+      summary: User 정보를 내려준다.
+      description: 등록시간 역순으로 정렬된 User 정보를 내려준다. 관리자 인증 토큰이 필요함!! 
+      tags: ["user"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          description: page 당 30개식 내려준다.
+          name: count
+          required: true
+          type: integer
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+
+  /user/act/{id}:
+    get:
+      summary: 등록한 Dress에 달린 갯수 카운트 
+      description: 등록 한 Dress 수, 받은 좋아요 수, 받은 댓글 수를 내려준다.
+      tags: ["user"]
+      parameters:
+        - in: path
+          description: 검색할 사용자 ID 
+          name: id
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/ACT'
+        530:
+          description: 몽고 디비 에러
+  /user/find/{email}:
+    get:
+      summary: 사용자 검색(이메일).
+      description: Path에 있는 email의 사용자를 내려준다.
+      tags: ["user"]
+      parameters:
+        - in: path
+          name: email
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        530:
+          description: 몽고 디비 에러
+  /user/find/{email}/all:
+    get:
+      summary: 사용자 검색(이메일).
+      description: Path에 있는 email의 사용자 정보를 모두 내려준다. 관리자 권한 필요! 
+      tags: ["user"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: email
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserFull'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+
+  #######################  DRESS  #######################
+  /dress:
+    post:
+      summary: 옷 정보 등록
+      description: 옷 정보를 등록한다.
+      tags: ['Dress']
+      parameters:
+        - in: header
+          name: x-access-token
+          type: string
+          required: true
+        - in: body
+          name: body
+          type: object
+          required: true
+            schema:
+              properties:
+                owner: 
+                  type: string
+                images:
+                  type: array
+                  items: string
+                say:
+                  type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Dress'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+        
+  /dress/{count}:
+    get:
+      summary: 최근 등록 데이터 
+      description: 최근에 등록된 Dress 정보를 count만큼 내려준다.
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: count
+          required: true
+          type: integer
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Dress'
+  /dress/count:
+    get:
+      summary: 등록된 옷 수
+      description: 지금까지 등록된 갯수
+      tags: ['Dress']
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/SIMPLE'
+  /dress/like/{page}:
+    get:
+      summary: 좋아요 순
+      description: 좋아요를 많이 받은 순으로 정렬 데이터// 좋아요 수가 같다면 시간 역순 
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: page
+          required: true
+          type: integer
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/Dress'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러
+
+  /dress/award/{count}:
+    get:
+      summary: Award 받은 이용자 
+      description: Award 받은 사용자 정보를 count만큼 내려준다.
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: count
+          required: true
+          type: integer
+          minimum: 1
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/Dress'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러
+  /dress/{milliseconds}/{page}:
+    get:
+      summary: 옷 가져오기 
+      description: milliseconds 이후 page를 계산해서 가져온다. 
+                    Count로 만 하면 더 가져오기 할 때 신규 등록건에 밀려 중복된 데이터가 내려간다.
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: milliseconds
+          required: true
+          type: integer
+          minimum: 1588055923042
+        - in: path
+          name: page
+          required: true
+          type: integer
+          minimum: 0
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/Dress'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러
+  /dress/{year}/{month}/{day}/{milliseconds}/{page}:
+    get:
+      summary: 옷 가져오기 
+      description: 해당 일에 대한 Dress 정보만 내려 준다.
+                    milliseconds 이후 page를 계산해서 가져온다. 
+                    Count로 만 하면 더 가져오기 할 때 신규 등록건에 밀려 중복된 데이터가 내려간다.
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: year
+          required: true
+          type: integer
+          minimum: 2020
+        - in: path
+          name: month
+          required: true
+          type: integer
+          minimum: 1
+        - in: path
+          name: day
+          required: true
+          type: integer
+          minimum: 1
+        - in: path
+          name: milliseconds
+          required: true
+          type: integer
+          minimum: 1588055923042
+        - in: path
+          name: milliseconds
+          required: true
+          type: page
+          minimum: 1588055923042
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/DressHasAward'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러
+  /dress/award/{year}/{month}:
+    get:
+      summary: 월별 어워드 리스트
+      description: 해당 년 월에 어워드를 받은 사용자를 내려준다.
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: year
+          required: true
+          type: integer
+          mininum: 2020
+        - in: path
+          name: month
+          required: true
+          type: integer
+          mininum: 1
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/Dress'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러    
+  /dress/user/{userId}/{page}/{sortType}:
+    get:
+      summary: 사용자 옷 가져오기 
+      description: 사용자가 등록한 옷을 가져온다. sortType(like 좋아요 받은 순, date 시간 역순)
+      tags: ['Dress']
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          type: string
+        - in: path
+          name: page
+          required: true
+          type: integer
+        - in: path
+          name: sortType
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            type: array
+            $ref: '#/definitions/Dress'
+        254:
+          description: 검색결과 없음.
+        530:
+          description: 몽고 디비 에러    
+  /dress/{dressId}:
+    patch:
+      summary: Dress 수정
+      tags: ['Dress']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string 
+        - in: path
+          name: dressId
+          requried: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          type: object
+          properties:
+            say: 
+              type: string
+            images:
+              type: array
+              items: string
+            isAward:
+              type: boolean
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/DressBrief'
+        530:
+          description: 몽고 디비 에러    
+    delete: 
+      summary: Dress 삭제
+      description: 삭제하지 않고 isShow flag를 변경한다.
+      tags: ['Dress']      
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: dressId
+          required: true
+          type: string
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/DressBrief'
+        530:
+          description: 몽고 디비 에러    
+  /dress/like:
+    patch:
+      summary: Dress 좋아요
+      tags: ['Dress']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string 
+        - in: body
+          name: body
+          required: true
+          type: object
+          properties:
+            userId: 
+              type: string
+            dressId:
+              type: string
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/DressBrief'
+        530:
+          description: 몽고 디비 에러    
+        
+
+  #######################  TAG  #######################
+  /tag:
+    get:
+      summary: TAG 정보 가져오기
+      description: 등록된 TAG와 갯수를 가져온다.
+      tags: ["TAG"]
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Tag'
+        530:
+          description: 몽고 디비 에러
+  /tag/{tagName}:
+    get:
+      summary: TAG 정보 가져오기
+      description: 등록된 TAG와 갯수를 가져온다.
+      tags: ["TAG"]
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Tag'
+        530:
+          description: 몽고 디비 에러
+  /tag/search/{word}:
+    get:
+      summary: TAG 정보 가져오기
+      description: param에 있는 word가 포함된 테그 정보를 모두 내려 준다.
+      tags: ["TAG"]
+      parameters:
+        - in: path
+          name: word
+          requried: true
+          type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Tag'
+        530:
+          description: 몽고 디비 에러
+  /tag/search/tagId/{tagId}/dress/{page}:
+    get:
+      summary: Dress 가져오기 
+      description: Tag를 사용하는 dress를 모두 가져온다.
+      tags: ["TAG"]
+      parameters:
+        - in: path
+          name: tagId
+          requried: true
+          type: string
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Dress'
+        530:
+          description: 몽고 디비 에러
+  /tag/search/word/{word}/dress/{page}:
+    get:
+      summary: Dress 가져오기 
+      description: Tag를 사용하는 dress를 모두 가져온다.
+      tags: ["TAG"]
+      parameters:
+        - in: path
+          name: tagId
+          requried: true
+          type: string
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Dress'
+        530:
+          description: 몽고 디비 에러
+
+  #######################  Like  #######################
+  #######################  Reply  #######################
+
+  /reply:
+    post:
+      summary: 댓글 등록하기
+      description: 댓글 등록
+      tags: ['reply']
+      parameters:
+        - in: body
+          name: body
+          type: object
+          schema:
+            required:
+              - owner
+              - parent
+              - say
+            properties:
+              owner:
+                type: string
+              parent:
+                type: string
+              say:
+                type: string
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/ReplyBrief'
+        530:
+          description: 몽고 디비 에러          
+  /reply/{page}:
+    get:
+      summary: 댓글 가져오기
+      description: 댓글 목록을 가져온다. page당 30개 
+      tags: ['reply']
+      parameters:
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/ReplyBrief'
+        530:
+          description: 몽고 디비 에러
+  /reply/detail/{page}:
+    get:
+      summary: 댓글 가져오기
+      description: 댓글 목록을 가져온다. 상세 정보 page당 30개 
+      tags: ['reply']
+      parameters:
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/Reply'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+            /reply/detail/{page}:
+  /reply/user/{userId}/{page}:
+    get:
+      summary: 댓글 가져오기
+      description: 사용자가 그동안 등록한 댓글 리스트를 가져온다. 상세 정보 page당 30개 
+      tags: ['reply']
+      parameters:
+        - in: path
+          name: userId
+          requried: true
+          type: string
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/Reply'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /reply/dress/{dressId}/{page}:
+    get:
+      summary: 댓글 가져오기
+      description: 옷에 등록된 댓글 리스트를 가져온다. 상세 정보 page당 30개 
+      tags: ['reply']
+      parameters:
+        - in: path
+          name: dressId
+          requried: true
+          type: string
+        - in: path
+          name: page
+          requried: true
+          type: integer
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/ReplyBrief'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  #######################  NOTIFY  #######################
+  /notify:
+    post:
+      summary: 공지 등록
+      description: 공지 등록 * Say는 HTML 코드로 작성 해야 합니다.
+      tags: ['notify']
+      parameters:
+        - in: body
+          name: body
+          type: object
+          schema:
+            required:
+              - title
+              - say
+            properties:
+              title: 
+                type: string
+              say: 
+                type: string
+              appStop:
+                type: boolean
+                default: false
+              important: 
+                type: boolean
+                default: false
+              show:
+                type: boolean
+                default: true
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/Notify'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+    get:
+      summary: 전체 공지 가져오기 
+      description: 전체 등록된 공지를 가져온다.
+      tags: ['notify']
+      responses:
+        200: 
+          schema:
+            $ref: '#/definitions/Notify'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /notify/{page}:
+    get:
+      summary: 공지 가져오기
+      description: 시간의 역순으로 30개식 공지를 가져온다. *Say는 HTML 코드로 작성되어 있습니다.
+      tags: ['notify']
+      parameters:
+        - in: path
+          name: page
+          required: true
+          type: integer
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Notify'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /notify/main/{seq}:
+    get:
+      summary: 메인화면 공지 가져오기
+      description: Path의 seq이후 등록된 공지 중 중요, 앱 중지 관련 공지를 가져온다. *Say는 HTML 코드로 작성되어 있습니다.
+      tags: ['notify']
+      parameters:
+        - in: path
+          name: seq
+          required: true
+          type: integer
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Notify'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /notify/{id}:
+    patch:
+      summary: 공지 수정
+      description: 공지사항 수정한다. *Say는 HTML 코드로 작성되어 있습니다.
+      tags: ['notify']
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+        - in: body
+          name: body
+          requred: true
+          type: object
+          schema:
+            properties:
+              title:
+                type: string
+              say:
+                type: string
+              appStop:
+                type: boolean
+                default: false
+              important:
+                type: boolean
+                default: false
+              show:
+                type: boolean
+                default: true
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Notify'
+        530:
+          description: 몽고 디비 에러
+    delete:
+      summary: 공지 삭제
+      description: 공지를 삭제하진 않고 show 상태를 false로 변경한다.
+      tags: ['notify']
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Notify'
+        530:
+          description: 몽고 디비 에러
+  #######################  AGRREMENT  #######################
+  /term:
+    post:
+      summary: 약관
+      description: 약관 등록//  term(HTML로 작성, 이용약관), userTerm(HTML로 작성, 개인정보이용)
+      tags: ['Term']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          type: object
+          schema:
+            properties: 
+              term: 
+                type: string
+              userTerm:
+                type: string
+              release:
+                type: boolean
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/Term'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+  /term/{seq}:
+    get:
+      summary: 약관
+      description: seq 이후 약관 
+      tags: ['Term']
+      parameters:
+        - in: path
+          name: seq
+          required: true
+          type: integer
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/Term'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /term/{termId}:
+    patch:
+      summary: 약관 수정
+      description: 약관 수정 
+      tags: ['Term']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: termId
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          type: object
+          schema:
+            properties: 
+              term: 
+                type: string
+              userTerm:
+                type: string
+              release:
+                type: boolean
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/Term'
+        530:
+          description: 몽고 디비 에러
+    delete:
+      summary: 약관 삭제
+      description: 약관 삭제 
+      tags: ['Term']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: termId
+          required: true
+          type: string
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/Term'
+        530:
+          description: 몽고 디비 에러
+  #######################  APPUPDATE #######################
+  /update:
+    post:
+      summary:  앱 업데이트 등록
+      description: 앱 업데이트 등록, 필수 업데이트 경우 isMustUpdate Ture로 입력!
+      tags: ['Update']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          type: object
+          schema:
+            properties: 
+              appVer: 
+                type: integer
+              say:
+                type: string
+              isMustUpdate:
+                type: boolean
+                default: false
+              isShow:
+                type: boolean
+                default: true
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/AppUpdate'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+    get:
+      summary: 업데이트 히스토리
+      description: 업데이트 정보를 가져온다.
+      tags: ['Update']
+      parameters: 
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/AppUpdate'
+        521:
+          description: 권한 없음 
+        531:
+          description: JWT 에러 
+        530:
+          description: 몽고 디비 에러
+  /update/{ver}:
+    get:
+      summary: 업데이트 
+      description: Path ver 이후 업데이트 정보 가져옴. 중간에 필수 업데이트가 있는 경우 isMustUpdate true로 넘어옴.
+      tags: ['Update']
+      parameters:
+        - in: path
+          name: ver
+          required: true
+          type: integer
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/AppUpdate'
+        254:
+          description: 검색 결과 없음
+        530:
+          description: 몽고 디비 에러
+  /update/{updateId}:
+    patch:
+      summary: 업데이트 수정
+      description: 업데이트 수정 
+      tags: ['Update']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: updateId
+          required: true
+          type: string
+        - in: body
+          name: body
+          required: true
+          type: object
+          schema:
+            properties: 
+              appVer: 
+                type: integer
+              say:
+                type: string
+              isMustUpdate:
+                type: boolean
+                default: false
+              isShow:
+                type: boolean
+                default: true
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/AppUpdate'
+        530:
+          description: 몽고 디비 에러
+    delete:
+      summary: 업데이트 삭제
+      description: 업데이트 삭제 
+      tags: ['Update']
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: path
+          name: updateId
+          required: true
+          type: string
+      responses:
+        200: 
+          schema: 
+            $ref: '#/definitions/AppUpdate'
+        530:
+          description: 몽고 디비 에러
+
+
+  #######################  SETTING  #######################
+  /setting:
+    get:
+      summary: 설정.
+      description: 사용자의 설정정보를 가져온다. JWT 필수 
+      tags: ["other"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Setting'
+        521:
+          description: 권한 없음 
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+    patch:
+      summary: 설정.
+      description: 사용자의 설정정보를 변경한다. JWT 필수 
+      tags: ["other"]
+      parameters:
+        - in: header
+          name: x-access-token
+          required: true
+          type: string
+        - in: body
+          name: body
+          schema: 
+            type: object
+            properties:
+              likeAlarm:
+                type: boolean
+              replyAlarm:
+                type: boolean
+              emailSend:
+                type: boolean
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/Setting'
+        521:
+          description: 권한 없음 
+        530:
+          description: 몽고 디비 에러
+        531:
+          description: JWT 에러 
+securityDefinitions:
+  JWT:
+    type: apiKey
+    in: header
+    name: X-Access-Token
+security:
+  - JWT: []
+  ###########################################################################
+  ########################                           ########################
+  ########################        Definitions        ########################
+  ########################                           ########################
+  ###########################################################################
+definitions:
+  SIMPLE:
+    type: object
+    properties:
+      result:
+        type: integer
+        emun: [-1, 1]
+  ACT:
+    type: object
+    properties:
+      likeCount:
+        type: integer
+      replyCount:
+        type: integer
+      postCount:
+        type: integer
+  DETAILME:
+    type: object
+    properties:
+      totalCount: 
+        type: integer
+      awardCount: 
+        type: integer
+      receiveLikeCount: 
+        type: integer
+      receiveReplyCount: 
+        type: integer
+
+  Account:
+    type: object
+    properties: 
+      _id:
+        type: string
+        description: ObjectID 
+      email:
+        type: string
+        format: email
+      password:
+        type: string
+      type:
+        description: 0(회원가입), 1(구글)
+        type: integer
+        enum: [0, 1]
+      checkEmail:
+        type: boolean
+      createdAt:
+        type: string
+        format: date-time
+  Signin:
+    type: object
+    properties:
+      _id:
+        type: string
+      token:
+        type: string
+      checkEmail: 
+        type: boolean
+  EmailCheck:
+    type: object
+    properties:
+      exist:
+        type: boolean
+  UserType1:
+    type: object
+    properties:
+      _id:
+        type: string
+      email:
+        type: string
+        format: email
+      name:
+        type: string
+      secureLevel:
+        type: integer
+      pictureMe:
+        type: string
+      aboutMe:
+        type: string
+      step:
+        type: integer
+      useStop:
+        type: boolean
+      stopReason:
+        type: integer
+      pushToken:
+        type: string
+      hasAward:
+        type: integer
+      setting:
+        description: Setting ID 
+        type: string
+      dress:
+        type: array
+        items: string
+      reply:
+        type: array
+        items: string
+      likeDress:
+        type: array
+        items: string
+      createdAt: 
+        type: string
+        format: date-time
+  UserBrief:
+    type: object
+    properties:
+      _id: 
+        type: string
+      email:
+        type: string
+        format: email
+      name:
+        type: string
+      pictureMe:
+        type: string
+      aboutMe:
+        type: string
+      useStop:
+        type: integer
+      hasAward: 
+        type: integer
+  User:
+    type: object
+    properties:
+      _id: 
+        type: string
+      email:
+        type: string
+        format: email
+      name:
+        type: string
+      secureLevel:
+        type: string
+      pictureMe:
+        type: string
+      aboutMe:
+        type: string
+      step:
+        type: integer
+      useStop:
+        type: boolean
+      stopReason:
+        type: integer
+      pushToken:
+        type: string
+      hasAward:
+        type: integer
+      setting:
+        type: string
+      dressCount:
+        type: string
+      replyCount:
+        type: integer
+      likeDressCount:
+        type: integer
+      createdAt: 
+        type: string
+        format: date-time
+  UserFull:
+    type: object
+    properties:
+      _id:
+        type: string
+      email:
+        type: string
+        format: email
+      name:
+        type: string
+      secureLevel:
+        type: integer
+      pictureMe:
+        type: string
+      aboutMe:
+        type: string
+      step:
+        type: integer
+      useStop:
+        type: boolean
+      stopReason:
+        type: integer
+      pushToken:
+        type: string
+      hasAward:
+        type: integer
+      setting:
+        $ref: '#/definitions/Setting'
+      dress:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/DressFull'
+      reply:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/Reply'
+      likeDress:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/DressFull'
+      createdAt: 
+        type: string
+        format: date-time
+  DressFull:
+    type: object
+    properties:
+      owner: 
+          $ref: '#definitions/UserBrief'
+      images: 
+        type: array
+        items: 
+          type: string 
+      say: 
+        type: string
+      isAward:
+        type: boolean
+      isShow:
+        type: boolean
+      tags:
+        type: array
+        items: 
+          type: object
+          $ref: '#/definitions/Tag'
+      reply:
+        type: array
+        items: 
+          type: object
+          $ref: '#/definitions/Reply'
+      like:
+        type: array
+        items: 
+          type: object
+          $ref: '#/definitions/UserBrief'
+      createdAt: 
+        type: string
+        format: date-time
+  DressHasAward:
+    type: object
+    properties:
+      award: 
+        type: array
+        items:
+          $ref: '#/definitions/Dress'
+      dress: 
+        type: array
+        items:
+          $ref: '#/definitions/Dress'
+  Dress:
+    type: object
+    properties:
+      _id:
+        type: string
+      owner: 
+          $ref: '#/definitions/UserBrief'
+      images: 
+        type: array
+        items: 
+          type: string 
+      say: 
+        type: string
+      isAward:
+        type: boolean
+      isShow:
+        type: boolean
+      tags:
+        type: array
+        items: 
+          type: object
+          $ref: '#/definitions/Tag'
+      likeThis:
+        type: boolean
+      likeCount:
+        type: integer
+      replyCount:
+        type: integer
+      favoritePoint:
+        type: integer
+      createdAt: 
+        type: string
+        format: date-time
+  DressBrief:
+    type: object
+    properties:
+      _id:
+        type: string
+      owner: 
+        $ref: '#/definitions/UserBrief'
+      say: 
+        type: string
+      images: 
+        type: array
+        items: 
+          type: string 
+      isAward:
+        type: boolean
+      createdAt: 
+        type: string
+        format: date-time
+  Reply:
+    type: object
+    properties:
+      _id:
+        type: string
+      owner:
+        $ref: '#/definitions/UserBrief'
+      parent:
+        $ref: '#/definitions/DressBrief'
+      say:
+        type: string 
+      createdAt: 
+        type: string
+        format: date-time
+  ReplyBrief: 
+    type: object
+    properties:
+      _id: 
+        type: string
+      owner:
+        $ref: '#/definitions/UserBrief'
+      say:
+        type: string
+      createdAt: 
+        type: string
+        format: date-time
+  Notify: 
+    type: object
+    properties:
+      seq: 
+        type: integer
+      title:
+        type: string
+      say:
+        type: string
+      appStop:
+        type: boolean
+      important:
+        type: boolean
+      show:
+        type: boolean
+      createdAt: 
+        type: string
+        format: date-time      
+  Tag:
+    type: object
+    properties:
+      _id:
+        type: string
+      tag:
+        type: string
+      count: 
+        type: integer
+  Term:
+    type: object
+    properties:
+      _id:
+        type: string
+      seq:
+        type: integer
+      userTerm: 
+        type: string
+      release: 
+        type: boolean
+      createdAt: 
+        type: string
+        format: date-time      
+  AppUpdate:
+    type: object
+    properties:
+      _id:
+        type: string
+      appVer:
+        type: integer
+      say: 
+        type: string
+      isMustUpdate: 
+        type: boolean
+      isShow: 
+        type: boolean
+      createdAt: 
+        type: string
+        format: date-time      
+  Setting:
+    type: object
+    properties:
+      _id:
+        type: string
+      likeAlarm: 
+        type: boolean
+      replyAlarm: 
+        type: boolean
+      emailSend: 
+        type: boolean
+  InitData:
+    type: object
+    properties:
+      notify:
+        type: array
+        items: 
+          $ref: '#/definitions/Notify'
+      term:
+        $ref: '#/definitions/Term'
+      update:
+        $ref: '#/definitions/AppUpdate'
+  Response: 
+    type: object
+    properties:
+      state: 
+        type: string
+        enum: ['success', 'fail']
+      code: 
+        type: integer
+      error:
+        $ref: '#/definitions/Error'
+      data: 
+        type: object
+  Error:
+    type: object
+    properties:
+      message: 
+        type: string
+      trace:
+        type: object
+        properties:
+          code:
+            type: integer
+          title:
+            type: string
+          errmsg: 
+            type: string
+
