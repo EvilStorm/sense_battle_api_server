@@ -68,3 +68,6 @@ Object.keys(ifaces).forEach(function (ifname) {
       ++alias;
     });
 });
+
+
+app.use('/api/user', require('./routers/user'));

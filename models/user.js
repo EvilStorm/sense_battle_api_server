@@ -2,7 +2,7 @@ module.exports =  (sequelize, DataTypes) => {
     return sequelize.define(
         'user',
         {   
-            userId: {
+            identifyId: {
                 type: DataTypes.STRING,
                 allowNull: false,
                 unique: true
@@ -24,7 +24,7 @@ module.exports =  (sequelize, DataTypes) => {
         {
             indexes: [
                 {
-                    fields: ['userId']
+                    fields: ['identifyId']
                 },
                 {
                     fields: ['nickName']
