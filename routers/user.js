@@ -4,43 +4,58 @@ const response = require('../components/RespUtil');
 const {createException} = require('../components/ExceptionCreator');
 var {ResponseCode} = require('../components/RespCodeStore');
 
-var {user} = require('../models');
-
-const auth = require('../components/Auth');
-
+var {sequelize, user, setting, token_box} = require('../models');
 
 router.post('', async function(req, res) {
+    console.log(`user Post body: ${JSON.stringify(req.body)}`);
 
-    var user = await getUser(req.body.identifyId)
-    if(user = null) {
-        var signInResult = await joinUs();
-        if(signInResult == true) {
-            user = await getUser(req.body.identifyId)
+
+    var user = await doSignIn(req.body.identifyId)
+    console.log("joinUs user");
+    console.log(user);
+
+    if(user == null) {
+        var signInResult = await joinUs(req.body);
+        if(signInResult != true) {
+            res.json(response.fail(message= "회원가입에 실패했습니다.\n잠시후 다시 시도해주세요.", code= ResponseCode.FAIL.QUERY_FAIL));
+            return;
         }
+
+        user = await doSignIn(req.body.identifyId)
+    } 
+
+    if(user != null) {
+        res.json(response.success(user)); 
+    } else {
+        res.json(response.fail(message= "로그인에 실패했습니다.", code= ResponseCode.FAIL.QUERY_FAIL));
     }
-
     
-
-
-
-
 });
 
 async function doSignIn(identifyId) {
-
+    return await getUser(identifyId)
 }
 
 async function joinUs(data) {
     let transaction = await sequelize.transaction();
+    console.log("joinUs data");
+    console.log(data);
+
 
     try {
 
-        const user = await user.create(data, {transaction});
-        if(user != null) {
+        const userResult = await user.create(data, {transaction});
+        console.log(`User: ${userResult}`);
+
+        if(userResult != null) {
             await setting.create({
-                userId: user.id
+                userId: userResult.id
             }, {transaction})
+            console.log(`Setting Create`);
+
+            transaction.commit();
         }
+
         return true;
     } catch (e) {
         console.log(e)
@@ -52,17 +67,16 @@ async function joinUs(data) {
 
 
 async function getUser(identifyId) {
-    var user = await user.findOne({
+    return await user.findOne({
+        attributes: {exclude: ['createdAt', 'updatedAt']},
         include: [
             {
                 model: setting,
-                atrributes: {exclude: ['createdAt', 'updatedAt', 'userId']}
+                attributes: {exclude: ['createdAt', 'updatedAt', 'userId']}
             }
         ],
         where: {identifyId}
     });
-
-    return user;
 }
 
 
@@ -80,14 +94,12 @@ router.get('/:id', async function(req, res) {
     })
 });
 
-router.patch('/', auth.isSignIn, function(req, res) {
-    console.log(req.decoded)
-
+router.patch('/:id', function(req, res) {
     user.update(
         req.body,
         {
             where: {
-                id: req.decoded.id
+                id: req.params.id
             }
             
         }
@@ -106,5 +118,8 @@ router.patch('/', auth.isSignIn, function(req, res) {
     })
 });
 
+router.delete("/:id", function(req, res) {
+    
+});
 
 module.exports = router;

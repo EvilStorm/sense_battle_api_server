@@ -20,6 +20,10 @@ module.exports =  (sequelize, DataTypes) => {
                 allowNull: true,
                 unique: true
             },
+            availability: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            }
         },
         {
             indexes: [

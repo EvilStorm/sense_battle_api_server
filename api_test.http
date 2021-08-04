@@ -1,0 +1,23 @@
+###
+POST http://localhost:2394/api/user
+content-type: application/json
+
+{
+    "identifyId": "asdkjqwikjasdasd",
+    "joinType": 0,
+    "secureLevel": 0
+}
+
+###
+GET http://localhost:2394/api/user/1
+content-type: application/json
+
+
+###
+PATCH http://localhost:2394/api/user/1
+content-type: application/json
+
+{
+    "secureLevel": 4
+}
+

@@ -34,8 +34,8 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-
 db['user'].hasOne(db['setting'])
+db['user'].hasOne(db['user_availability'])
 db['user'].belongsToMany(db['writing_question'] ,{through: 'user_writing_map'})
 db['user'].belongsToMany(db['writing_reply'] ,{through: 'user_reply_map'})
 
