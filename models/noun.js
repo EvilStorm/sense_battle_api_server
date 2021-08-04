@@ -6,7 +6,7 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            word: {
+            word_desc: {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
