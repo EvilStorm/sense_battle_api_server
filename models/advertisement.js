@@ -1,22 +1,28 @@
 module.exports =  (sequelize, DataTypes) => {
     return sequelize.define(
-        'writing_question',
+        'advertisement',
         {   
-            round: {
+            thumbnail: {
+                type: DataTypes.STRING,
+            },
+            link: {
+                type: DataTypes.STRING,
+            },
+            priority: {
                 type: DataTypes.INTEGER.UNSIGNED,
                 defaultValue: 0
             },
-            startDate: {
+            start_date: {
                 type: DataTypes.DATE,
             },
-            endDate: {
+            end_date: {
                 type: DataTypes.DATE,
             },
         },
         {
             indexes: [
                 {
-                    fields: ['round']
+                    fields: ['start_date', 'end_date']
                 },
             ]
         }

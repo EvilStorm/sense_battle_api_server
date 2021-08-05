@@ -8,30 +8,22 @@ module.exports =  (sequelize, DataTypes) => {
             },
             word_desc: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                allowNull: true,
+            },
+            source_url: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             used: {
                 type: DataTypes.INTEGER.UNSIGNED,
                 defaultValue: 0
             },
-            is_advertise: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: FALSE
-            },
-            advertise_line: {
-                type: DataTypes.STRING,
-                defaultValue: FALSE
-            },
-            
         },
         {
             indexes: [
                 {
                     fields: ['word']
                 },
-                {
-                    fields: ['is_advertise']
-                }
             ]
         }
       

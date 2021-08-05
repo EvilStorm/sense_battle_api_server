@@ -71,3 +71,5 @@ Object.keys(ifaces).forEach(function (ifname) {
 
 
 app.use('/api/user', require('./routers/user'));
+app.use('/api/noun', require('./routers/noun'));
+app.use('/api/writingSubject', require('./routers/writing_subject'));

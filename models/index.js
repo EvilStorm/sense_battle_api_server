@@ -36,13 +36,15 @@ db.Sequelize = Sequelize;
 
 db['user'].hasOne(db['setting'])
 db['user'].hasOne(db['user_availability'])
-db['user'].belongsToMany(db['writing_question'] ,{through: 'user_writing_map'})
+db['user'].belongsToMany(db['writing_subject'] ,{through: 'user_writing_map'})
 db['user'].belongsToMany(db['writing_reply'] ,{through: 'user_reply_map'})
 
-db['writing_question'].belongsToMany(db['writing_reply'], {through: 'question_reply_map'})
+db['writing_subject'].belongsToMany(db['writing_reply'], {through: 'subject_reply_map'})
 
-db['writing_question'].belongsToMany(db['noun'], {through: 'question_noun_map'})
-db['noun'].belongsToMany(db['writing_question'], {through: 'question_noun_map'})
+db['writing_subject'].belongsToMany(db['noun'], {through: 'subject_noun_map'})
+db['noun'].belongsToMany(db['writing_subject'], {through: 'subject_noun_map'})
+db['writing_reply'].belongsToMany(db['writing_reply_vote'], {through: 'reply_vote_map'})
+
 
 
 module.exports = db;
