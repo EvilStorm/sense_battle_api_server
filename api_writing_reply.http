@@ -1,0 +1,18 @@
+###
+POST http://localhost:2394/api/applicateReply/35
+content-type: application/json
+id: 1
+identify-id: asdkjqwikjasdasd
+
+{
+    "say": "it is reply!!"
+}
+
+###
+GET http://localhost:2394/api/applicateReply/1
+content-type: application/json
+
+###
+GET http://localhost:2394/api/applicateReply/allInfo/1
+content-type: application/json
+

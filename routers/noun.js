@@ -11,7 +11,7 @@ router.post('', async function(req, res) {
     console.log("post body: ")
     console.log(req.body)
 
-    const result = noun.create(req.body);
+    const result = await noun.create(req.body);
 
     if(result != null) {
         res.json(response.success(result)); 

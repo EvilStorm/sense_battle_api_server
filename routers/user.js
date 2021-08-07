@@ -3,8 +3,9 @@ const router = express.Router();
 const response = require('../components/RespUtil');
 const {createException} = require('../components/ExceptionCreator');
 var {ResponseCode} = require('../components/RespCodeStore');
+const auth = require('../components/Auth');
 
-var {sequelize, user, setting, token_box} = require('../models');
+var {sequelize, user, setting, writing_applicate,} = require('../models');
 
 router.post('', async function(req, res) {
     console.log(`user Post body: ${JSON.stringify(req.body)}`);
@@ -93,6 +94,37 @@ router.get('/:id', async function(req, res) {
         res.json(response.fail(_));
     })
 });
+
+
+router.get('/allInfo/:id', async function(req, res) {
+
+    user.findOne({
+        attributes: {exclude: ['createdAt', 'updatedAt']},
+        include: [
+            {
+                model: setting,
+                attributes: {exclude: ['createdAt', 'updatedAt', 'userId']},
+            },
+            {
+                model: writing_applicate,
+                attributes: {exclude: ['createdAt', 'updatedAt']},
+                through: {
+                    attributes: []
+                } 
+            }
+        ],
+        where: {
+            id: req.params.id
+        }
+    })
+    .then(_ => {
+        res.json(response.success(_));
+    })
+    .catch(_ => {
+        res.json(response.fail(_));
+    })
+});
+
 
 router.patch('/:id', function(req, res) {
     user.update(

@@ -1,9 +1,18 @@
 ###
-POST http://localhost:2394/api/writingSubject
+POST http://localhost:2394/api/writingSubject/makeSubject
 content-type: application/json
 
 {
-    "round": 17,
-    "startDate": "2021/08/06 00:00:00",
-    "endDate": "2021/08/06 13:00:00"
+    "round": 3,
+    "startDate": "2021/08/07 15:00:00",
+    "endDate": "2021/08/07 17:00:00"
 }
+
+###
+GET http://localhost:2394/api/writingSubject/lastSubject
+content-type: application/json
+
+###
+GET http://localhost:2394/api/writingSubject/allInfo/3
+content-type: application/json
+

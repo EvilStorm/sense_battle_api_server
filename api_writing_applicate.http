@@ -1,0 +1,19 @@
+###
+POST http://localhost:2394/api/writingApplicate/applicate/3
+content-type: application/json
+id: 1
+identify-id: asdkjqwikjasdasd
+
+{
+    "round": 3,
+    "say": "asdwascasdasd"
+}
+
+###
+GET http://localhost:2394/api/writingApplicate/round/3
+content-type: application/json
+
+###
+GET http://localhost:2394/api/writingApplicate/allInfo/round/3
+content-type: application/json
+

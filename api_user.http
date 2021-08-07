@@ -12,6 +12,9 @@ content-type: application/json
 GET http://localhost:2394/api/user/1
 content-type: application/json
 
+###
+GET http://localhost:2394/api/user/allInfo/1
+content-type: application/json
 
 ###
 PATCH http://localhost:2394/api/user/1
