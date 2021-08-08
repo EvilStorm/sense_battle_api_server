@@ -69,6 +69,8 @@ Object.keys(ifaces).forEach(function (ifname) {
     });
 });
 
+app.use('/api/term', require('./routers/term'));
+app.use('/api/notify', require('./routers/notify'));
 
 app.use('/api/user', require('./routers/user'));
 app.use('/api/noun', require('./routers/noun'));

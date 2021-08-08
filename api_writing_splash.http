@@ -1,0 +1,36 @@
+###
+POST http://localhost:2394/api/term
+content-type: application/json
+identify-id: admin
+id: 1
+
+{
+    "trem": "6666666",
+    "userTerm": "666666666",
+    "release": true
+}
+
+###
+GET http://localhost:2394/api/term/after/6
+content-type: application/json
+
+
+###
+POST http://localhost:2394/api/notify
+content-type: application/json
+identify-id: admin
+{
+    "title": "999",
+    "message": "999",
+    "appStop": false,
+    "important": true,
+    "used": true
+
+}
+
+###
+GET http://localhost:2394/api/notify/after/7
+content-type: application/json
+ 
+
+  
