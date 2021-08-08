@@ -14,8 +14,8 @@ router.post('/makeSubject', auth.isAdmin, async function(req, res) {
 
     try {
         var nouns = await noun.findAll({ order: sequelize.literal('rand()'), limit: 3 });
-        console.log(nouns);
 
+        nounsAddUsedCount(nouns)
 
         const newSubject = await writing_subject.create(req.body);
         await newSubject.addNoun(nouns[0], {through: 'subject_reply_map'})
@@ -48,6 +48,23 @@ router.post('/makeSubject', auth.isAdmin, async function(req, res) {
 
     }
 });
+
+function nounsAddUsedCount(nounList) {
+    for (var item of nounList) {
+        console.log(item.dataValues.id);
+        noun.update(
+            {
+                used: item.dataValues.used + 1
+            },
+            {
+                where: {
+                    id: item.dataValues.id
+                }
+            },
+        );
+    }
+
+}
 
 router.get('/lastSubject', async function(req, res) {
    try {
