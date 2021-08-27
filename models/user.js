@@ -7,6 +7,10 @@ module.exports =  (sequelize, DataTypes) => {
                 allowNull: false,
                 unique: true
             },
+            email: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             joinType: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
@@ -32,6 +36,9 @@ module.exports =  (sequelize, DataTypes) => {
                 },
                 {
                     fields: ['nickName']
+                },
+                {
+                    fields: ['email']
                 },
             ]
         }
