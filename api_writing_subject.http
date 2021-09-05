@@ -5,9 +5,9 @@ identify-id: admin
 id: 1
 
 {
-    "round": 6,
-    "startDate": "2021/08/07 15:00:00",
-    "endDate": "2021/08/07 17:00:00"
+    "round": 1,
+    "startDate": "2021/09/05 15:00:00",
+    "endDate": "2021/09/05 17:00:00"
 }
 
 ###
@@ -15,6 +15,5 @@ GET http://localhost:2394/api/writingSubject/lastSubject
 content-type: application/json
 
 ###
-GET http://localhost:2394/api/writingSubject/allInfo/3
+GET http://localhost:2394/api/writingSubject/allInfo/1
 content-type: application/json
-

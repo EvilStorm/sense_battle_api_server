@@ -1,6 +1,6 @@
 module.exports =  (sequelize, DataTypes) => {
     return sequelize.define(
-        'writing_applicate_police',
+        'police',
         {   
             enable: {
                 type: DataTypes.BOOLEAN,
@@ -14,17 +14,11 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            userId: {
-                type: DataTypes.INTEGER,
-            }
+            type: {
+                type: DataTypes.INTEGER.UNSIGNED,
+                defaultValue: 0,
+            },
         },
-        {
-            indexes: [
-                {
-                    fields: ['userId']
-                },
-            ]
-        }
       
     )
 }

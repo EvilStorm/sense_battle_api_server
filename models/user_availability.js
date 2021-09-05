@@ -14,10 +14,12 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
             },
-            period: {
-                type: DataTypes.INTEGER,
+            startDate: {
+                type: DataTypes.DATE,
             },
-
+            endDate: {
+                type: DataTypes.DATE,
+            },
         },
     )
 }

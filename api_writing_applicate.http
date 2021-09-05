@@ -1,19 +1,19 @@
 ###
-POST http://localhost:2394/api/writingApplicate/applicate/3
+POST http://localhost:2394/api/writingApplicate/applicate/1
 content-type: application/json
 id: 1
 identify-id: asdkjqwikjasdasd
 
 {
-    "round": 3,
-    "say": "asdwascasdasd"
+    "round": 1,
+    "say": "asdwascasdasd1211111"
 }
 
 ###
-GET http://localhost:2394/api/writingApplicate/round/3
+GET http://localhost:2394/api/writingApplicate/round/1
 content-type: application/json
 
 ###
-GET http://localhost:2394/api/writingApplicate/allInfo/round/3
+GET http://localhost:2394/api/writingApplicate/allInfo/round/1
 content-type: application/json
 

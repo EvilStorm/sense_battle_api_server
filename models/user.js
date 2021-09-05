@@ -11,6 +11,10 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
+            imageUrl: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             joinType: {
                 type: DataTypes.INTEGER,
                 defaultValue: 0

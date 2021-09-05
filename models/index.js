@@ -34,36 +34,35 @@ Object.keys(db).forEach(modelName => {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db['user'].hasOne(db['setting'])
-db['user'].hasOne(db['user_availability'])
-db['user'].belongsToMany(db['writing_applicate'] ,{through: 'user_writing_applicate_map'})
-db['user'].belongsToMany(db['writing_reply'] ,{through: 'user_reply_map'})
+db['user'].hasOne(db['setting']);
+db['user'].hasMany(db['user_availability']);
 
-db['writing_applicate'].belongsToMany(db['user'] ,{through: 'user_writing_applicate_map'})
-db['writing_reply'].belongsToMany(db['user'] ,{through: 'user_reply_map'})
+db['user'].hasMany(db['writing_applicate']);
+db['writing_applicate'].belongsTo(db['user']);
+
+db['user'].hasMany(db['writing_reply']);
+db['writing_reply'].belongsTo(db['user']);
+
+db['user'].hasMany(db['police']);
+db['police'].belongsTo(db['user']);
+
+db['user'].hasMany(db['vote']);
+db['vote'].belongsTo(db['user']);
+
+db['writing_subject'].hasMany(db['writing_applicate']);
+db['writing_subject'].hasMany(db['writing_collector']);
+
+db['writing_collector'].belongsToMany(db['noun'], {through: 'write_subject_nouns'});
+db['noun'].belongsToMany(db['writing_collector'], {through: 'write_subject_nouns'} );
+
+db['writing_applicate'].hasMany(db['writing_reply']);
+db['writing_applicate'].hasMany(db['police']);
+db['writing_applicate'].hasMany(db['vote']);
 
 
-db['user'].belongsToMany(db['writing_reply_vote'] ,{through: 'user_reply_vote_map'})
-db['user'].belongsToMany(db['writing_reply_police'] ,{through: 'user_reply_police_map'})
-db['user'].belongsToMany(db['writing_applicate_vote'] ,{through: 'user_applicate_vote_map'})
-db['user'].belongsToMany(db['writing_applicate_police'] ,{through: 'user_applicate_police_map'})
+db['writing_reply'].hasMany(db['police']);
+db['writing_reply'].hasMany(db['vote']);
 
-db['writing_subject'].belongsToMany(db['writing_applicate'] ,{through: 'writing_applicate_map'})
-db['writing_applicate'].belongsToMany(db['writing_reply'], {through: 'writing_applicate_reply_map'})
-db['writing_reply'].belongsToMany(db['writing_applicate'], {through: 'writing_applicate_reply_map'})
-
-db['writing_subject'].belongsToMany(db['noun'], {through: 'writing_subject_noun_map'})
-db['noun'].belongsToMany(db['writing_subject'], {through: 'writing_subject_noun_map'})
-
-db['writing_applicate'].belongsToMany(db['writing_applicate_vote'] ,{through: 'writing_applicate_vote_map'})
-db['writing_applicate'].belongsToMany(db['writing_applicate_police'] ,{through: 'writing_applicate_police_map'})
-db['writing_applicate_vote'].belongsToMany(db['writing_applicate'] ,{through: 'writing_applicate_vote_map'})
-db['writing_applicate_police'].belongsToMany(db['writing_applicate'] ,{through: 'writing_applicate_police_map'})
-
-db['writing_reply'].belongsToMany(db['writing_reply_vote'] ,{through: 'writing_reply_vote_map'})
-db['writing_reply'].belongsToMany(db['writing_reply_police'] ,{through: 'writing_reply_police_map'})
-db['writing_reply_vote'].belongsToMany(db['writing_reply'] ,{through: 'writing_reply_vote_map'})
-db['writing_reply_police'].belongsToMany(db['writing_reply'] ,{through: 'writing_reply_police_map'})
 
 
 module.exports = db;

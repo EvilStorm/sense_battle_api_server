@@ -5,7 +5,7 @@ const {createException} = require('../components/ExceptionCreator');
 var {ResponseCode} = require('../components/RespCodeStore');
 const auth = require('../components/Auth');
 
-var {sequelize, noun, writing_subject, writing_applicate, user, writing_reoply} = require('../models');
+var {sequelize, noun, writing_subject, writing_applicate, user, writing_collector} = require('../models');
 
 router.post('/makeSubject', auth.isAdmin, async function(req, res) {
 
@@ -18,9 +18,14 @@ router.post('/makeSubject', auth.isAdmin, async function(req, res) {
         nounsAddUsedCount(nouns)
 
         const newSubject = await writing_subject.create(req.body);
-        await newSubject.addNoun(nouns[0], {through: 'subject_reply_map'})
-        await newSubject.addNoun(nouns[1], {through: 'subject_reply_map'})
-        await newSubject.addNoun(nouns[2], {through: 'subject_reply_map'})
+        const collector = await writing_collector.create({
+            round: newSubject.round,
+            writingSubjectId: newSubject.id,
+        });
+
+        await collector.addNoun(nouns[0], {through: 'write_subject_nouns'})
+        await collector.addNoun(nouns[1], {through: 'write_subject_nouns'})
+        await collector.addNoun(nouns[2], {through: 'write_subject_nouns'})
 
 
         const result = await writing_subject.findOne({
@@ -30,19 +35,28 @@ router.post('/makeSubject', auth.isAdmin, async function(req, res) {
             },
             include: [
                 {
-                    model: noun,
-                    attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
-                    through: {
-                        attributes: []
-                    } 
+                    model: writing_collector,
+                    attributes: ['id'],
+                    include: [
+                        {
+                            model: noun,
+                            attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
+                            through: {
+                                attributes: []
+                            } 
+                        }   
+                        
+                    ]
                 }
             ],
-
         })
 
         res.json(response.success(result)); 
 
     } catch (e) {
+    
+        console.log(e);
+
         var error = createException(ExceptionType.QUERY_FAIL);
         res.json(response.fail(error, error.errmsg, error.code));
 
@@ -68,23 +82,33 @@ function nounsAddUsedCount(nounList) {
 
 router.get('/lastSubject', async function(req, res) {
    try {
-        var result = await writing_subject.findAll({
+
+        const result = await writing_subject.findOne({
             attributes: {exclude: ['createdAt', 'updatedAt']},
             order: [['round', 'desc']],
             limit: 1,
             include: [
                 {
-                    model: noun,
-                    attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
-                    through: {
-                        attributes: []
-                    } 
-                },
-            ]
-        });
+                    model: writing_collector,
+                    attributes: ['id'],
+                    include: [
+                        {
+                            model: noun,
+                            attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
+                            through: {
+                                attributes: []
+                            } 
+                        }   
+                        
+                    ]
+                }
+            ],
+        })
+
         res.json(response.success(result));
 
     }catch (e){
+        console.log(e);
         var error = createException(ExceptionType.QUERY_FAIL);
         res.json(response.fail(error, error.errmsg, error.code));
 
@@ -104,77 +128,86 @@ router.get('/:id', async function(req, res) {
 });
 
 router.get('/allInfo/:id', async function(req, res) {
-    writing_subject.findOne({
-        where: {id: req.params.id},
-        include: [
-            {
-                model: noun,
-                attributes: {exclude: ['createdAt', 'updatedAt', 'userId']},
-                through: {
-                    attributes: []
-                } 
-            },
-            {
-                model: writing_applicate,
-                attributes: {exclude: ['createdAt', 'updatedAt']},
-                include: [
-                    {
-                        model: user,
-                        attributes: ['id', 'nickName'],
-                        through: {
-                            attributes: []
-                        },                     
-                    }
-                ],
-                through: {
-                    attributes: []
-                } 
-            },
-        ],
-    })
-    .then(_ => {
-        res.json(response.success(_));
-    })
-    .catch(_ => {
-        res.json(response.fail(_));
-    })
+    try {
+
+        const result = await writing_subject.findOne({
+            attributes: {exclude: ['createdAt', 'updatedAt']},
+            order: [['round', 'desc']],
+            limit: 1,
+            include: [
+                {
+                    model: writing_collector,
+                    attributes: ['id'],
+                    include: [
+                        {
+                            model: noun,
+                            attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
+                            through: {
+                                attributes: []
+                            } 
+                        }   
+                        
+                    ]
+                },
+                {
+                    model: writing_applicate, 
+                    attributes: ['id', 'round', 'say', 'like', 'unlike', 'userId'],
+                    include: [
+                        {
+                            model: user,
+                            attributes: ['id', 'email', 'nickName', 'imageUrl'],
+                        }
+                    ]
+                }
+            ],
+        })
+
+        res.json(response.success(result));
+
+    }catch (e){
+        console.log(e);
+        var error = createException(ExceptionType.QUERY_FAIL);
+        res.json(response.fail(error, error.errmsg, error.code));
+
+    }
+
 });
 
 
-router.get('/lastSubject/:subjectId/replay/best', async function(req, res) {
-    try {
-         var result = await writing_reply.findAll({
-             where: {
-                subjectId: req.params.subjectId
-             },
-             attributes: {exclude: ['createdAt', 'updatedAt']},
-             order: [['like', 'desc']],
-             limit: 15
-         });
-         res.json(response.success(result));
+// router.get('/lastSubject/:subjectId/replay/best', async function(req, res) {
+//     try {
+//          var result = await writing_reply.findAll({
+//              where: {
+//                 subjectId: req.params.subjectId
+//              },
+//              attributes: {exclude: ['createdAt', 'updatedAt']},
+//              order: [['like', 'desc']],
+//              limit: 15
+//          });
+//          res.json(response.success(result));
  
-     }catch (e){
-         var error = createException(ExceptionType.QUERY_FAIL);
-         res.json(response.fail(error, error.errmsg, error.code));
+//      }catch (e){
+//          var error = createException(ExceptionType.QUERY_FAIL);
+//          res.json(response.fail(error, error.errmsg, error.code));
  
-     }
- });
+//      }
+//  });
 
- router.get('/lastSubject/replay/timeLine/:startTime/:page', async function(req, res) {
-    try {
-         var result = await writing_subject.findAll({
-             attributes: {exclude: ['createdAt', 'updatedAt']},
-             order: [['created_at', 'desc']],
+//  router.get('/lastSubject/replay/timeLine/:startTime/:page', async function(req, res) {
+//     try {
+//          var result = await writing_subject.findAll({
+//              attributes: {exclude: ['createdAt', 'updatedAt']},
+//              order: [['created_at', 'desc']],
 
-        });
-         res.json(response.success(result));
+//         });
+//          res.json(response.success(result));
  
-     }catch (e){
-         var error = createException(ExceptionType.QUERY_FAIL);
-         res.json(response.fail(error, error.errmsg, error.code));
+//      }catch (e){
+//          var error = createException(ExceptionType.QUERY_FAIL);
+//          res.json(response.fail(error, error.errmsg, error.code));
  
-     }
- });
+//      }
+//  });
 
  
 

@@ -6,6 +6,7 @@ var {ResponseCode} = require('../components/RespCodeStore');
 const auth = require('../components/Auth');
 
 var {sequelize, user, writing_subject, writing_applicate, writing_reply, writing_reply_vote} = require('../models');
+const e = require('express');
 
 router.post('', async function(req, res) {
 
@@ -28,22 +29,12 @@ router.post('/applicate/:subjectId', auth.isSignIn, async function(req, res) {
     console.log(req.decoded.id)
     try {
         
-        const appilcate = await writing_applicate.create(req.body);
-
-        const subject = await writing_subject.findOne({
-            where: {
-                id: req.params.subjectId,
-            }
+        const appilcate = await writing_applicate.create({
+            round: req.body.round,
+            say: req.body.say,
+            userId: req.decoded.id,
+            writingSubjectId: req.params.subjectId,
         });
-        const postUser = await user.findOne({
-            where: {
-                id: req.decoded.id
-            }
-        });
-
-        await subject.addWriting_applicate(appilcate, {through: 'writing_applicate_map'})
-        await postUser.addWriting_applicate(appilcate, {through: 'user_writing_applicate_map'})
-        await appilcate.addUser(postUser, {through: 'user_writing_applicate_map'})
 
         res.json(response.success(appilcate)); 
 
@@ -66,9 +57,17 @@ router.get('/:id', async function(req, res) {
         res.json(response.fail(_));
     })
 });
+
 router.get('/round/:round', async function(req, res) {
     writing_applicate.findAll({
-        where: {round: req.params.round,}
+        attributes: ['id', 'round', 'say', 'like', 'unlike', 'userId'],
+        where: {round: req.params.round,},
+        include: [
+            {
+                model: user,
+                attributes: ['id', 'nickName', 'imageUrl'],
+            }
+        ]
     })
     .then(_ => {
         res.json(response.success(_));
@@ -91,7 +90,7 @@ router.get('/allInfo/round/:round', async function(req, res) {
             },
             {
                 model: writing_reply,
-                attributes: ['id', 'say'],
+                attributes: ['id', 'say', 'imageUrl'],
                 include: [
                     {
                         model: user,
