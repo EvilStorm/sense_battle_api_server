@@ -1,0 +1,19 @@
+###
+POST http://localhost:2394/api/appVer
+content-type: application/json
+identify-id: admin
+id: 1
+
+{
+    "version": "3",
+    "message": "This is awsome.333",
+    "nessesary": false,
+    "used": true
+
+}
+
+###
+GET http://localhost:2394/api/appVer/after/0
+content-type: application/json
+identify-id: admin
+id: 1

@@ -1,0 +1,5 @@
+###
+GET http://localhost:2394/api/appStart/notify/0/appVer/0/term/0
+content-type: application/json
+identify-id: admin
+id: 1

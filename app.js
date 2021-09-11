@@ -69,8 +69,10 @@ Object.keys(ifaces).forEach(function (ifname) {
     });
 });
 
+app.use('/api/appStart', require('./routers/app_start'));
 app.use('/api/auth', require('./routers/auth'));
 app.use('/api/term', require('./routers/term'));
+app.use('/api/appVer', require('./routers/app_version'));
 app.use('/api/notify', require('./routers/notify'));
 
 app.use('/api/user', require('./routers/user'));

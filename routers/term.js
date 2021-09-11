@@ -4,6 +4,7 @@ const response = require('../components/RespUtil');
 const {createException} = require('../components/ExceptionCreator');
 var {ResponseCode} = require('../components/RespCodeStore');
 const auth = require('../components/Auth');
+var {getTerm, } = require('./collector/term');
 
 var {sequelize, term, } = require('../models');
 var {Op} = require('sequelize');
@@ -38,22 +39,15 @@ router.get('/:id', async function(req, res) {
 });
 
 router.get('/after/:id', async function(req, res){
-    term.findOne({
-        where: {
-            id: {
-                [Op.gt]: req.params.id 
-            },
-            release: true
-        },
-        order: [['id', 'desc']],
-        limit: 1
-    })
-    .then(_ => {
-        res.json(response.success(_));
-    })
-    .catch(_ => {
-        res.json(response.fail(_));
-    })
+
+    console.log(`req.params.id: ${req.params.id}`)
+    try {
+        var result = await getTerm(req.params.id);
+        res.json(response.success(result));
+    } catch (e) {
+        res.json(response.fail(e));
+
+    }
 });
 
 router.patch('/:id', function(req, res) {

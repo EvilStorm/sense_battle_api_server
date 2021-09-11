@@ -2,14 +2,15 @@ module.exports =  (sequelize, DataTypes) => {
     return sequelize.define(
         'term',
         {   
-            trem: {
-                type: DataTypes.STRING,
+            term: {
+                type: DataTypes.TEXT,
+                allowNull: false,
             },
-            userTerm: {
-                type: DataTypes.STRING,
-                allowNull: true,
+            user_term: {
+                type: DataTypes.TEXT,
+                allowNull: false,
             },
-            release: {
+            used: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
             },

@@ -1,0 +1,19 @@
+###
+POST http://localhost:2394/api/notify
+content-type: application/json
+identify-id: admin
+id: 1
+
+{
+    "title": "앱 배포 됩니다.3333",
+    "message": "This is awsome.333",
+    "appStop": false,
+    "used": true
+
+}
+
+###
+GET http://localhost:2394/api/notify/after/0
+content-type: application/json
+identify-id: admin
+id: 1
