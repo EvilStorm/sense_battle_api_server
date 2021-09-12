@@ -10,9 +10,10 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER.UNSIGNED,
                 defaultValue: 0,
             },
-            reseaon_msg: {
+            reseaonMsg: {
                 type: DataTypes.STRING,
                 allowNull: true,
+                field: "reseaon_msg",
             },
             type: {
                 type: DataTypes.INTEGER.UNSIGNED,

@@ -13,6 +13,7 @@ module.exports =  (sequelize, DataTypes) => {
             appStop: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
+                field: "app_stop",
             },
             important: {
                 type: DataTypes.BOOLEAN,

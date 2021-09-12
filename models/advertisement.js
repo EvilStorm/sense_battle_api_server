@@ -12,11 +12,13 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER.UNSIGNED,
                 defaultValue: 0
             },
-            start_date: {
+            startDate: {
                 type: DataTypes.DATE,
+                field: "start_date",
             },
-            end_date: {
+            endDate: {
                 type: DataTypes.DATE,
+                field: "end_date",
             },
         },
         {

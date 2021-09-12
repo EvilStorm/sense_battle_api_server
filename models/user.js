@@ -5,7 +5,8 @@ module.exports =  (sequelize, DataTypes) => {
             identifyId: {
                 type: DataTypes.STRING,
                 allowNull: false,
-                unique: true
+                unique: true,
+                field: 'identify_id',
             },
             email: {
                 type: DataTypes.STRING,
@@ -14,19 +15,23 @@ module.exports =  (sequelize, DataTypes) => {
             imageUrl: {
                 type: DataTypes.STRING,
                 allowNull: true,
+                field: 'image_url',
             },
             joinType: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0
+                defaultValue: 0,
+                field: 'join_type',
             },
             secureLevel: {
                 type: DataTypes.INTEGER,
-                defaultValue: 0
+                defaultValue: 0,
+                field: 'secure_level',
             },
             nickName: {
                 type: DataTypes.STRING,
                 allowNull: true,
-                unique: true
+                unique: true,
+                field: 'nick_name',
             },
             availability: {
                 type: DataTypes.INTEGER,
@@ -36,10 +41,10 @@ module.exports =  (sequelize, DataTypes) => {
         {
             indexes: [
                 {
-                    fields: ['identifyId']
+                    fields: ['identify_id']
                 },
                 {
-                    fields: ['nickName']
+                    fields: ['nick_name']
                 },
                 {
                     fields: ['email']

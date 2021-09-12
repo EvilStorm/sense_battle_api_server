@@ -5,8 +5,8 @@ identify-id: admin
 id: 1
 
 {
-    "version": "3",
-    "message": "This is awsome.333",
+    "version": "1",
+    "message": "This is awsome.111",
     "nessesary": false,
     "used": true
 

@@ -6,9 +6,11 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.TEXT,
                 allowNull: false,
             },
-            user_term: {
+            userTerm: {
                 type: DataTypes.TEXT,
                 allowNull: false,
+                field: "user_term",
+
             },
             used: {
                 type: DataTypes.BOOLEAN,

@@ -7,7 +7,7 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 defaultValue: 0
             },
-            reason_msg: {
+            reasonMsg: {
                 type: DataTypes.STRING,
             },
             state: {
@@ -16,9 +16,11 @@ module.exports =  (sequelize, DataTypes) => {
             },
             startDate: {
                 type: DataTypes.DATE,
+                field: "start_date",
             },
             endDate: {
                 type: DataTypes.DATE,
+                field: "end_date",
             },
         },
     )

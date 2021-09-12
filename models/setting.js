@@ -5,25 +5,30 @@ module.exports =  (sequelize, DataTypes) => {
   return sequelize.define(
     'setting',
     {
-        alarm_my_contents: {
+        alarmMyContents: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
+            field: "alarm_my_contents",
         },
-        alarm_system: {
+        alarmSystem: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
+            field: "alarm_system",
         },
-        alarm_advertise: {
+        alarmAdvertise: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
+            field: "alarm_advertise",
         },
-        alarm_event: {
+        alarmEvent: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
+            field: "alarm_event",
         },
-        alarm_game_start: {
+        alarmGameStart: {
             type: DataTypes.BOOLEAN,
             defaultValue: true,
+            field: "alarm_game_start",
         },
     },
 )}

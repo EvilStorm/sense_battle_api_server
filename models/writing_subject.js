@@ -8,9 +8,11 @@ module.exports =  (sequelize, DataTypes) => {
             },
             startDate: {
                 type: DataTypes.DATE,
+                field: "start_date",
             },
             endDate: {
                 type: DataTypes.DATE,
+                field: "end_date",
             },
         },
         {

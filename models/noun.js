@@ -6,13 +6,15 @@ module.exports =  (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            word_desc: {
+            wordDesc: {
                 type: DataTypes.STRING,
                 allowNull: true,
+                field: "word_desc",
             },
-            source_url: {
+            sourceUrl: {
                 type: DataTypes.STRING,
                 allowNull: true,
+                field: "source_url",
             },
             used: {
                 type: DataTypes.INTEGER.UNSIGNED,
