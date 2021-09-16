@@ -5,7 +5,7 @@ content-type: application/json
 {
     "identifyId": "asdkjqwikjasdasd",
     "email": "kaka@kaka.com",
-    "joinType": 0,
+    "joinType": 1,
     "secureLevel": 0
 }
 

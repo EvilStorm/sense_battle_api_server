@@ -94,7 +94,7 @@ router.get('/lastSubject', async function(req, res) {
                     include: [
                         {
                             model: noun,
-                            attributes: ['id', 'word', 'word_desc', 'source_url', 'used'],
+                            attributes: {exclude: ['createdAt', 'updatedAt']},
                             through: {
                                 attributes: []
                             } 
